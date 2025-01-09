@@ -1,13 +1,12 @@
-from influxdb_client import UserResponse
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import Session
-from fastapi import FastAPI,Depends,HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request, Body
 from typing import List
+from uvicorn import run
 from typing import Optional
-
 
 
 
@@ -21,7 +20,6 @@ engine=create_engine(DATABASE_URL, connect_args={"check_same_thread":False})
 SessionLocal= sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base=declarative_base()
-
 class User(Base):
     __tablename__="users"
 
@@ -46,7 +44,7 @@ class UserCreate(BaseModel):
     email=str
 
 class UserResponse(BaseModel):
-    id:int
+    # id:int
     name:str
     email:str
 
@@ -54,8 +52,15 @@ class UserResponse(BaseModel):
         orm_mode=True
 
 @app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate,db:Session=Depends(get_db)):
-    db_user = User(name=user.name, email=user.email)
+def create_user(
+        request: Request,
+        # user: UserCreate,
+        name: str ,
+        email: str ,
+        id: int ,
+        db:Session=Depends(get_db)):
+    # pass
+    db_user = User(name=name, email=email)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -66,6 +71,7 @@ def create_user(user: UserCreate,db:Session=Depends(get_db)):
 def read_users(skip:int=0, limit:int=10, db: Session =Depends(get_db)):
     users =db.query(User).offset(skip).limit(limit).all()
     return users
+
 
 @app.get("/users/{user_id}", response_model=UserResponse)
 def read_user(user_id:int, db:Session= Depends(get_db)):
@@ -82,8 +88,10 @@ class UserUpdate(BaseModel):
 
 @app.put("/users/{user_id}", response_model =UserResponse)
 def update_user(user_id: int, user:UserUpdate, db: Session = Depends(get_db)):
-    db_user =db.query(User).filter(User.id == user_id).first()
-
+    db_user = db.query(User).filter(User.id == user_id).first()
+    # """
+    # select * from Users where id = {user_id}
+    # """
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -104,3 +112,7 @@ def delete_user(user_id: int, db:Session= Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return db_user
+
+if __name__ == '__main__':
+    # logger.info("Started main")
+    run("main:app", host="0.0.0.0", port=8182, reload=True)
