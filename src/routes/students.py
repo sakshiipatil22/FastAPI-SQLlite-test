@@ -42,7 +42,7 @@ def get_stud_by_id(
     except Exception as e:
         logger.debug(f"Error Occurred in get_stud_by_id - {e}")
         raise HTTPException(status_code=500, detail=f"{e}")
-    
+
 
 @router.post("/add_new_student", tags=["Manage Library credentials"])
 def add_stud_info(
