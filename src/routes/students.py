@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -6,39 +7,41 @@ from loguru import logger
 from src.db.models import StudentInfo
 from typing import Optional
 
-router =APIRouter()
+router = APIRouter()
+
 
 class StudentCreate(BaseModel):
     name: str = None
     email: str = None
     bookcode: int = None
-    issue_date: str = None
+    issue_date: datetime = None
 
 
-@router.get("/get_all_stud_info",tags=["View Students"])
+@router.get("/get_all_stud_info", tags=["View Students"])
 def get_all_stud_data(
-    db:Session=Depends(get_db)
+        db: Session = Depends(get_db)
 ):
     try:
-        res=db.query(StudentInfo).all()
-        return{
-            "status_code":200,
-            "detail":res
+        res = db.query(StudentInfo).all()
+        return {
+            "status_code": 200,
+            "detail": res
         }
     except Exception as e:
         logger.debug(f"Error Occurred in get_all_stud_data - {e}")
         raise HTTPException(status_code=500, detail=f"{e}")
-    
+
+
 @router.get("/get_all_stud_id", tags=["View Students"])
 def get_stud_by_id(
-    id:int,
-    db:Session= Depends(get_db)
+        id: int,
+        db: Session = Depends(get_db)
 ):
     try:
-        res=db.query(StudentInfo).filter_by(id=id).all()
-        return{
-            "status_code":200,
-            "detail":res
+        res = db.query(StudentInfo).filter_by(id=id).all()
+        return {
+            "status_code": 200,
+            "detail": res
         }
     except Exception as e:
         logger.debug(f"Error Occurred in get_stud_by_id - {e}")
@@ -47,17 +50,17 @@ def get_stud_by_id(
 
 @router.post("/add_new_student", tags=["Manage Library credentials"])
 def add_stud_info(
-    info:StudentCreate,
-    db:Session= Depends(get_db)
+        info: StudentCreate,
+        db: Session = Depends(get_db)
 ):
     try:
-        stud_email=info.email
-        stud_exists=db.query(StudentInfo).filter_by(email=stud_email).first()
-        if len(stud_exists)>0:
+        stud_email = info.email
+        stud_exists = db.query(StudentInfo).filter_by(email=stud_email).first()
+        if (stud_exists) :
             logger.debug(f"Student Information already Exists - {stud_email}")
             raise HTTPException(status_code=400, detail=f"Student Email - {stud_email} information already exists")
         else:
-            stud_add_info=StudentInfo(
+            stud_add_info = StudentInfo(
                 name=info.name,
                 email=stud_email,
                 bookcode=info.bookcode,
@@ -65,31 +68,31 @@ def add_stud_info(
             )
             db.add(stud_add_info)
             db.commit()
-            return{
-                "status_code":200,
-                "detail":f"Student Name- {stud_email} Information Added Successfully"
+            return {
+                "status_code": 200,
+                "detail": f"Student - {stud_email} Information Added Successfully"
             }
     except HTTPException as e:
         raise e
     except Exception as e:
         logger.debug(f"Error Occurred in add_stud_info - {e}")
-        raise HTTPException(status_code= 500, detail= f"{e}")
-    
+        raise HTTPException(status_code=500, detail=f"{e}")
 
-@router.put("/Update_student_info",tags=["Manage Library credentials"])
+
+@router.put("/Update_student_info", tags=["Manage Library credentials"])
 def modify_stud_info(
-    id:int,
-    info:StudentCreate,
-    db:Session= Depends(get_db)
+        id: int,
+        info: StudentCreate,
+        db: Session = Depends(get_db)
 ):
     try:
-        stud_name=info.name
-        update_stud_info=db.query(StudentInfo).filter_by(id=id).update(info.dict(exclude_unset=True))
+        stud_name = info.name
+        update_stud_info = db.query(StudentInfo).filter_by(id=id).update(info.dict(exclude_unset=True))
         if update_stud_info:
             db.commit()
             return {
-                "status_code":200,
-                "detail":f"Student Name -{stud_name} Information Modified Successfully"
+                "status_code": 200,
+                "detail": f"Student Name -{stud_name} Information Modified Successfully"
             }
         else:
             logger.debug(f"Student information not exists of Name - {stud_name}")
@@ -100,25 +103,26 @@ def modify_stud_info(
         logger.debug(f"Error Occurred in modify_stud_info- {e}")
         raise HTTPException(status_code=500, detail=f"{e}")
 
+
 @router.delete("/delete_student", tags=["Manage Library credentials"])
 def delete_stud_info(
-    id:int,
-    db:Session= Depends(get_db)
+        id: int,
+        db: Session = Depends(get_db)
 ):
     try:
-        res=db.query(StudentInfo).filter_by(id=id).delete()
-        if len(res)>0:
+        res = db.query(StudentInfo).filter_by(id=id).all()
+        if len(res) > 0:
             db.delete(res[0])
             db.commit()
-            return{
-                "status_code":200,
-                "detail":f"Student_id - {id} Information Deleted Successfully"
+            return {
+                "status_code": 200,
+                "detail": f"Student_id - {id} Information Deleted Successfully"
             }
         else:
             logger.debug(f"Student information not exists of student id - {id}")
             raise HTTPException(status_code=400, detail=f"Student id - {id} information not exists")
     except HTTPException as e:
-        raise e 
+        raise e
     except Exception as e:
         logger.debug(f"Error Occurred in delete_stud_info - {e}")
         raise HTTPException(status_code=500, detail=f"{e}")
