@@ -67,7 +67,7 @@ def add_stud_info(
             db.commit()
             return{
                 "status_code":200,
-                "detail":f"Student Name- {stud_email} Information Added Successfully"
+                "detail":f"Student Email- {stud_email} Information Added Successfully"
             }
     except HTTPException as e:
         raise e
