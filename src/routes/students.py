@@ -50,15 +50,15 @@ def add_stud_info(
     db:Session= Depends(get_db)
 ):
     try:
-        stud_name=info.name
-        stud_exists=db.query(StudentInfo).filter_by(name=stud_name).all()
+        stud_email=info.email
+        stud_exists=db.query(StudentInfo).filter_by(email=stud_email).first()
         if len(stud_exists)>0:
-            logger.debug(f"Student Information of Name already Exists - {stud_name}")
-            raise HTTPException(status_code=400, detail=f"Student Name - {stud_name} information already exists")
+            logger.debug(f"Student Information already Exists - {stud_email}")
+            raise HTTPException(status_code=400, detail=f"Student Email - {stud_email} information already exists")
         else:
             stud_add_info=StudentInfo(
-                name=stud_name,
-                email=info.email,
+                name=info.name,
+                email=stud_email,
                 bookcode=info.bookcode,
                 issue_date=info.issue_date
             )
@@ -105,7 +105,7 @@ def delete_stud_info(
     db:Session= Depends(get_db)
 ):
     try:
-        res=db.query(StudentInfo).filter_by(id=id).all()
+        res=db.query(StudentInfo).filter_by(id=id).delete()
         if len(res)>0:
             db.delete(res[0])
             db.commit()

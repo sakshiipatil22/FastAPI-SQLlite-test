@@ -1,3 +1,5 @@
+from xmlrpc.client import DateTime
+
 from sqlalchemy import create_engine, Column, Integer, String, Float
 from os import getcwd
 from sqlalchemy.ext.declarative import declarative_base
@@ -36,5 +38,5 @@ class StudentInfo(Base):
     id=Column(Integer, primary_key=True, autoincrement=True)
     name=Column(String, nullable=True)
     email=Column(String, nullable=True)
-    bookcode=Column(Integer, primary_key=True, nullable=True)
-    issue_date=Column(String,nullable=True)
+    bookcode=Column(Integer, nullable=True)
+    issue_date = Column(String, nullable=True)
