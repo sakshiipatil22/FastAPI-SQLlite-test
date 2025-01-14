@@ -9,10 +9,11 @@ from typing import Optional
 router =APIRouter()
 
 class StudentCreate(BaseModel):
-    name:Optional[str]=None
-    email:Optional[str]=None
-    bookcode:Optional[int]=None
-    issue_date:Optional[str]=None
+    name: str = None
+    email: str = None
+    bookcode: int = None
+    issue_date: str = None
+
 
 @router.get("/get_all_stud_info",tags=["View Students"])
 def get_all_stud_data(
@@ -66,7 +67,7 @@ def add_stud_info(
             db.commit()
             return{
                 "status_code":200,
-                "detail":f"Student Name- {stud_name} Information Added Successfully"
+                "detail":f"Student Name- {stud_email} Information Added Successfully"
             }
     except HTTPException as e:
         raise e
