@@ -11,10 +11,10 @@ router = APIRouter()
 
 
 class StudentCreate(BaseModel):
-    name: str = None
-    email: str = None
-    bookcode: int = None
-    issue_date: datetime = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    bookcode: Optional[int] = None
+    issue_date: Optional[datetime] = None
 
 
 @router.get("/get_all_stud_info", tags=["View Students"])
@@ -22,7 +22,7 @@ def get_all_stud_data(
         db: Session = Depends(get_db)
 ):
     try:
-        res = db.query(StudentInfo).all()
+        res = db.query(StudentInfo).first()
         return {
             "status_code": 200,
             "detail": res
