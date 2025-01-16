@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from loguru import logger
 
+
 engine = None
 Base = declarative_base()
 DBSession: sessionmaker = None
